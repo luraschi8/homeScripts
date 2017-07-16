@@ -3,23 +3,22 @@
 export MOUNT_DRIVE="//192.168.0.108/Public/Media"
 export MOUNTPOINT="../mountPoint/"
 
-## Detect the user who launched the script
-usr=$(env | grep SUDO_USER | cut -d= -f 2)
-
 ## Exit if the script was not launched by root or through sudo
-if [ -z $usr ] && [ $USER = "root" ]
+if [[ "$EUID" -ne 0 ]]
 then
-    echo "The script needs to run as root" && exit 1
+    echo "The script needs to run as root"
+    exit 1
 fi
 
 returnMount=$(./mountDrive.sh)
-echo $returnMount
 
-if [ $returnMount -ne 0 ]; then
+if [[ $? -ne 0 ]]
+then
+	echo "Error mounting file"
 	exit 2
 fi
 
-echo "Calling fileMover now \n"
+echo "Calling fileMover now"
 
 ./unmountDrive.sh
 
