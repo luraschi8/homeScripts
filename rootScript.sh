@@ -13,6 +13,7 @@ then
 fi
 
 returnMount=$(./mountDrive.sh)
+echo $returnMount
 
 if [ $returnMount -ne 0 ]; then
 	exit 2
