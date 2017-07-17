@@ -19,6 +19,7 @@ then
 fi
 
 echo "Calling fileMover now"
+python listarArchivos.py $MOUNTPOINT
 
 ./unmountDrive.sh
 
