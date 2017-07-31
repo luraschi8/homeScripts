@@ -1,4 +1,4 @@
-from os import listdir, path 
+from os import listdir, path, getcwd 
 import sys
 import re
 import shutil
@@ -28,39 +28,44 @@ def recorrerDir(directorio):
     return listdir(directorio)
 
 def mover_archivos(lista):
-    series = []
+    series = armar_lista_series()
+    #print series
     for archivo in lista:
         if (isChapter(archivo)):
-            if (len(series) == 0):
-                series = armar_lista_series()
             ubicarCapitulo(archivo,series)
         else:
             ubicarPelicula(archivo)
     return
 
 def armar_lista_series():
-    dirlist = [ item for item in os.listdir(SERIES_DIR) if os.path.isdir(os.path.join(SERIES_DIR, item.replace(" ","."))) ]
-    print dirlist
+    #currentDir = getcwd()
+    #direcorio = currentDir + SERIES_DIR[2:]
+    dirlist = {}
+    for item in listdir(SERIES_DIR):
+        directorioCompleto = path.join(SERIES_DIR, item) 
+        if path.isdir(directorioCompleto):
+            dirlist[item.replace(" ",".").lower()] = directorioCompleto 
+    #print dirlist
     return dirlist
 
 def isChapter(archivo):
-    series_regex = ".[Ss][0-9][0-9][eE][0-9][0-9]"
+    series_regex = "[Ss][0-9][0-9][eE][0-9][0-9]"
     pattern = re.compile(series_regex)
-    return pattern.match(archivo)
+    return pattern.search(archivo)
 
 def ubicarCapitulo(archivo, series):
     serieEncontrada = ''
     for serie in series:
-        nombre = serie.split('/')[-1].lower()
-        if (archivo.lower().find(nombre) != -1):
+        if (archivo.lower().find(serie) != -1):
             serieEncontrada = serie
             break
     if (serieEncontrada == ''):
+        print "carpeta no encontrada para archivo:" + archivo
         return
     if(DEBUG):
-        print "moviendo capitulo: " + archivo + " a: " + serie
+        print "moviendo capitulo: " + archivo + " a: " + series[serieEncontrada]
         return
-    shutil.move(archivo, serieEncontrada) 
+    shutil.move(archivo, series[serieEncontrada]) 
     return
 
 def ubicarPelicula(archivo):
@@ -74,13 +79,13 @@ def main():
     tipo = 'Video'
     recursivo = 'Si'
     lista = lista_archivos(DOWNLOADS_DIR,tipo,recursivo)
-    print lista
+    #print lista
     mover_archivos(lista)
     print 'Programa Finalizado - '+str(len(lista))+' archivos encontrados.'
 
 DOWNLOADS_DIR="../Downloads"
-FILMS_DIR= sys.argv[1] + "Media/Films"
-SERIES_DIR = sys.argv[1] + "Media/Series"
+FILMS_DIR= sys.argv[1] + "Films"
+SERIES_DIR = sys.argv[1] + "Series"
 print FILMS_DIR
 print SERIES_DIR
 main()
